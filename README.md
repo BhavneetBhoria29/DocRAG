@@ -172,7 +172,7 @@ DocRAG/
 | [LangChain](https://github.com/langchain-ai/langchain) | Document loading, embeddings, tool abstractions |
 | [LangGraph](https://github.com/langchain-ai/langgraph) | Stateful agent graph / ReAct loop |
 | [OpenAI](https://platform.openai.com/) | GPT-4o (LLM) + text-embedding-ada-002 (embeddings) |
-| [FAISS](https://github.com/facebookresearch/faiss) | Local vector similarity search |
+| [ChromaDB](https://github.com/chroma-core/chroma) | Persistent local vector store with OpenAI embeddings |
 | [Streamlit](https://streamlit.io/) | Web UI |
 | [Wikipedia](https://pypi.org/project/wikipedia/) | General knowledge fallback tool |
 | [uv](https://github.com/astral-sh/uv) | Fast Python package and environment manager |
