@@ -1,18 +1,16 @@
 """Document processing module for loading and splitting documents"""
 
-from typing import List
-from langchain_community.document_loaders import WebBaseLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain.schema import Document
-
-from typing import List, Union
 from pathlib import Path
+from typing import List, Union
+
 from langchain_community.document_loaders import (
-    WebBaseLoader,
+    PyPDFDirectoryLoader,
     PyPDFLoader,
     TextLoader,
-    PyPDFDirectoryLoader
+    WebBaseLoader,
 )
+from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 class DocumentProcessor:
     """Handles document loading and processing"""
@@ -48,7 +46,7 @@ class DocumentProcessor:
 
     def load_from_pdf(self, file_path: Union[str, Path]) -> List[Document]:
         """Load document(s) from a PDF file"""
-        loader = PyPDFDirectoryLoader(str("data"))
+        loader = PyPDFLoader(str(file_path))
         return loader.load()
     
     def load_documents(self, sources: List[str]) -> List[Document]:
@@ -65,16 +63,20 @@ class DocumentProcessor:
         for src in sources:
             if src.startswith("http://") or src.startswith("https://"):
                 docs.extend(self.load_from_url(src))
-           
-            path = Path("data")
-            if path.is_dir():  # PDF directory
+                continue
+
+            path = Path(src).expanduser()
+
+            if path.is_dir():
                 docs.extend(self.load_from_pdf_dir(path))
             elif path.suffix.lower() == ".txt":
                 docs.extend(self.load_from_txt(path))
+            elif path.suffix.lower() == ".pdf":
+                docs.extend(self.load_from_pdf(path))
             else:
                 raise ValueError(
                     f"Unsupported source type: {src}. "
-                    "Use URL, .txt file, or PDF directory."
+                    "Use URL, .txt file, .pdf file, or PDF directory."
                 )
         return docs
     
