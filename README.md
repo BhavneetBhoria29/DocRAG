@@ -2,11 +2,11 @@
 
 [![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-agentic-purple.svg)](https://github.com/langchain-ai/langgraph)
-[![FAISS](https://img.shields.io/badge/vector--store-FAISS-green.svg)](https://github.com/facebookresearch/faiss)
+[![ChromaDB](https://img.shields.io/badge/vector--store-ChromaDB-green.svg)](https://github.com/chroma-core/chroma)
 [![Streamlit](https://img.shields.io/badge/UI-Streamlit-red.svg)](https://streamlit.io/)
 [![Python CI](https://github.com/BhavneetBhoria29/DocRAG/actions/workflows/ci.yml/badge.svg)](https://github.com/BhavneetBhoria29/DocRAG/actions/workflows/ci.yml)
 
-DocRAG is an agentic Retrieval-Augmented Generation system built with LangChain, LangGraph, FAISS, and OpenAI. A **ReAct agent** reasons over your documents and Wikipedia, dynamically choosing the right tool for each query — falling back to live retrieval when documents don't cover the question rather than hallucinating an answer.
+DocRAG is an agentic Retrieval-Augmented Generation system built with LangChain, LangGraph, ChromaDB, and OpenAI. A **ReAct agent** reasons over your documents and Wikipedia, dynamically choosing the right tool for each query — falling back to live retrieval when documents don't cover the question rather than hallucinating an answer.
 
 ---
 
@@ -24,8 +24,8 @@ This means fewer hallucinations on hybrid queries ("summarise this paper and exp
 ## Features
 
 - **Multi-source ingestion** — URLs, PDFs, plain text, DOCX, CSV, and HTML files
-- **ReAct agent (GPT-4o)** — tool routing between FAISS retriever and Wikipedia
-- **FAISS vector store** — fast local semantic search with OpenAI embeddings
+- **ReAct agent (GPT-4o)** — tool routing between hybrid retriever and Wikipedia
+- **Hybrid search** — BM25 + semantic search via ChromaDB with OpenAI embeddings
 - **LangGraph workflow** — stateful retrieve → reason → answer graph with Pydantic state
 - **Streamlit UI** — chat interface with source document preview and search history
 - **CLI mode** — example questions or interactive session from the terminal
@@ -41,7 +41,7 @@ User question
      ▼
 ┌─────────────┐      ┌──────────────────────────────────┐
 │  Retriever  │─────▶│        ReAct Agent (GPT-4o)       │
-│  (FAISS)    │      │  ┌────────────┐ ┌─────────────┐  │
+│  (Chroma)   │      │  ┌────────────┐ ┌─────────────┐  │
 └─────────────┘      │  │ retriever  │ │  wikipedia  │  │
                      │  │   tool     │ │    tool     │  │
                      │  └────────────┘ └─────────────┘  │
@@ -57,7 +57,7 @@ User question
 |---|---|
 | `src/config/config.py` | LLM model, chunk size, default URLs |
 | `src/document_ingestion/document_processor.py` | Load URLs / PDFs / TXT and split into chunks |
-| `src/vectorstore/vectorstore.py` | FAISS vector store and retriever |
+| `src/vectorstore/vectorstore.py` | ChromaDB persistent vector store + hybrid retriever |
 | `src/graph_builder/graph_builder.py` | LangGraph workflow (retrieve → answer) |
 | `src/node/reactnode.py` | ReAct agent node with retriever + Wikipedia tools |
 | `src/state/rag_state.py` | Pydantic state shared across graph nodes |
@@ -137,6 +137,8 @@ dp = DocumentProcessor()
 docs = dp.load_documents([
     "path/to/file.pdf",
     "path/to/notes.txt",
+    "path/to/report.docx",
+    "path/to/data.csv",
     "https://example.com/article",
 ])
 ```
@@ -150,7 +152,7 @@ DocRAG/
 ├── src/
 │   ├── config/              # Config and environment
 │   ├── document_ingestion/  # Document loading and chunking
-│   ├── vectorstore/         # FAISS vector store
+│   ├── vectorstore/         # ChromaDB persistent vector store
 │   ├── graph_builder/       # LangGraph workflow
 │   ├── node/                # Graph node implementations
 │   └── state/               # Shared graph state (Pydantic)
@@ -193,3 +195,19 @@ DocRAG/
 - [x] Swap FAISS for persistent vector store (ChromaDB)
 - [x] Add hybrid search (BM25 + semantic)
 - [x] Support additional file types (DOCX, CSV, HTML)
+
+---
+
+## Evaluation
+
+Evaluated using [RAGAS](https://github.com/explodinggradients/ragas) on 5 domain-relevant test cases:
+
+| Metric | Score |
+|---|---|
+| Faithfulness | 0.80 |
+| Answer Relevancy | 0.82 |
+| Context Precision | 0.90 |
+| Context Recall | 1.00 |
+| **Average** | **0.88** |
+
+Run it yourself: `python eval/evaluate.py`
