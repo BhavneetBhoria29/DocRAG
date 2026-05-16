@@ -173,6 +173,7 @@ DocRAG/
 | [LangGraph](https://github.com/langchain-ai/langgraph) | Stateful agent graph / ReAct loop |
 | [OpenAI](https://platform.openai.com/) | GPT-4o (LLM) + text-embedding-ada-002 (embeddings) |
 | [ChromaDB](https://github.com/chroma-core/chroma) | Persistent local vector store with OpenAI embeddings |
+| [rank-bm25](https://github.com/dorianbrown/rank_bm25) | BM25 keyword retriever for hybrid search |
 | [Streamlit](https://streamlit.io/) | Web UI |
 | [Wikipedia](https://pypi.org/project/wikipedia/) | General knowledge fallback tool |
 | [uv](https://github.com/astral-sh/uv) | Fast Python package and environment manager |
@@ -189,6 +190,6 @@ DocRAG/
 ## Roadmap
 
 - [ ] RAGAS evaluation pipeline (faithfulness, context precision, answer relevance)
-- [ ] Swap FAISS for persistent vector store (ChromaDB / pgvector)
-- [ ] Add hybrid search (BM25 + semantic)
+- [x] Swap FAISS for persistent vector store (ChromaDB)
+- [x] Add hybrid search (BM25 + semantic)
 - [ ] Support additional file types (DOCX, CSV, HTML)

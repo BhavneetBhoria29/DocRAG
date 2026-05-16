@@ -13,3 +13,4 @@ wheels/
 .env
 .DS_Store
 eval/results/*.jsondata/chroma_db/
+data/chroma_db/
