@@ -4,6 +4,7 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-agentic-purple.svg)](https://github.com/langchain-ai/langgraph)
 [![FAISS](https://img.shields.io/badge/vector--store-FAISS-green.svg)](https://github.com/facebookresearch/faiss)
 [![Streamlit](https://img.shields.io/badge/UI-Streamlit-red.svg)](https://streamlit.io/)
+[![Python CI](https://github.com/BhavneetBhoria29/DocRAG/actions/workflows/ci.yml/badge.svg)](https://github.com/BhavneetBhoria29/DocRAG/actions/workflows/ci.yml)
 
 DocRAG is an agentic Retrieval-Augmented Generation system built with LangChain, LangGraph, FAISS, and OpenAI. A **ReAct agent** reasons over your documents and Wikipedia, dynamically choosing the right tool for each query — falling back to live retrieval when documents don't cover the question rather than hallucinating an answer.
 
