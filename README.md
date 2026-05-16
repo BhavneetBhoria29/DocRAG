@@ -23,7 +23,7 @@ This means fewer hallucinations on hybrid queries ("summarise this paper and exp
 
 ## Features
 
-- **Multi-source ingestion** — URLs, PDFs, and plain text files
+- **Multi-source ingestion** — URLs, PDFs, plain text, DOCX, CSV, and HTML files
 - **ReAct agent (GPT-4o)** — tool routing between FAISS retriever and Wikipedia
 - **FAISS vector store** — fast local semantic search with OpenAI embeddings
 - **LangGraph workflow** — stateful retrieve → reason → answer graph with Pydantic state
@@ -189,7 +189,7 @@ DocRAG/
 
 ## Roadmap
 
-- [ ] RAGAS evaluation pipeline (faithfulness, context precision, answer relevance)
+- [x] RAGAS evaluation pipeline (faithfulness, context precision, answer relevance)
 - [x] Swap FAISS for persistent vector store (ChromaDB)
 - [x] Add hybrid search (BM25 + semantic)
-- [ ] Support additional file types (DOCX, CSV, HTML)
+- [x] Support additional file types (DOCX, CSV, HTML)

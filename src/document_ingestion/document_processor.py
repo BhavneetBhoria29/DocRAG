@@ -1,24 +1,28 @@
 """Document processing module for loading and splitting documents"""
-
 from pathlib import Path
 from typing import List, Union
-
 from langchain_community.document_loaders import (
     PyPDFDirectoryLoader,
     PyPDFLoader,
     TextLoader,
     WebBaseLoader,
+    Docx2txtLoader,
+    CSVLoader,
+    UnstructuredHTMLLoader,
 )
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+
 class DocumentProcessor:
     """Handles document loading and processing"""
-    
+
+    SUPPORTED_EXTENSIONS = {".txt", ".pdf", ".docx", ".csv", ".html", ".htm"}
+
     def __init__(self, chunk_size: int = 500, chunk_overlap: int = 50):
         """
         Initialize document processor
-        
+
         Args:
             chunk_size: Size of text chunks
             chunk_overlap: Overlap between chunks
@@ -29,6 +33,7 @@ class DocumentProcessor:
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap
         )
+
     def load_from_url(self, url: str) -> List[Document]:
         """Load document(s) from a URL"""
         loader = WebBaseLoader(url)
@@ -48,14 +53,28 @@ class DocumentProcessor:
         """Load document(s) from a PDF file"""
         loader = PyPDFLoader(str(file_path))
         return loader.load()
-    
+
+    def load_from_docx(self, file_path: Union[str, Path]) -> List[Document]:
+        """Load document(s) from a DOCX file"""
+        loader = Docx2txtLoader(str(file_path))
+        return loader.load()
+
+    def load_from_csv(self, file_path: Union[str, Path]) -> List[Document]:
+        """Load document(s) from a CSV file"""
+        loader = CSVLoader(str(file_path), encoding="utf-8")
+        return loader.load()
+
+    def load_from_html(self, file_path: Union[str, Path]) -> List[Document]:
+        """Load document(s) from a local HTML file"""
+        loader = UnstructuredHTMLLoader(str(file_path))
+        return loader.load()
+
     def load_documents(self, sources: List[str]) -> List[Document]:
         """
-        Load documents from URLs, PDF directories, or TXT files
+        Load documents from URLs, PDFs, TXT, DOCX, CSV, or HTML files.
 
         Args:
-            sources: List of URLs, PDF folder paths, or TXT file paths
-
+            sources: List of URLs or file paths
         Returns:
             List of loaded documents
         """
@@ -66,39 +85,45 @@ class DocumentProcessor:
                 continue
 
             path = Path(src).expanduser()
+            suffix = path.suffix.lower()
 
             if path.is_dir():
                 docs.extend(self.load_from_pdf_dir(path))
-            elif path.suffix.lower() == ".txt":
+            elif suffix == ".txt":
                 docs.extend(self.load_from_txt(path))
-            elif path.suffix.lower() == ".pdf":
+            elif suffix == ".pdf":
                 docs.extend(self.load_from_pdf(path))
+            elif suffix == ".docx":
+                docs.extend(self.load_from_docx(path))
+            elif suffix == ".csv":
+                docs.extend(self.load_from_csv(path))
+            elif suffix in {".html", ".htm"}:
+                docs.extend(self.load_from_html(path))
             else:
                 raise ValueError(
-                    f"Unsupported source type: {src}. "
-                    "Use URL, .txt file, .pdf file, or PDF directory."
+                    f"Unsupported source: {src}. "
+                    f"Supported types: {', '.join(sorted(self.SUPPORTED_EXTENSIONS))}, URL, or PDF directory."
                 )
+
         return docs
-    
+
     def split_documents(self, documents: List[Document]) -> List[Document]:
         """
         Split documents into chunks
-        
+
         Args:
             documents: List of documents to split
-            
         Returns:
             List of split documents
         """
         return self.splitter.split_documents(documents)
-    
+
     def process_urls(self, urls: List[str]) -> List[Document]:
         """
         Complete pipeline to load and split documents
-        
+
         Args:
-            urls: List of URLs to process
-            
+            urls: List of URLs or file paths to process
         Returns:
             List of processed document chunks
         """
