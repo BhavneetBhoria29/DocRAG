@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from langchain.agents import create_agent
 from langchain_core.documents import Document
-from langchain_core.tools import Tool
+from langchain_core.tools import tool
 from langchain_core.messages import HumanMessage
 from langgraph.graph.state import CompiledStateGraph
 from src.state.rag_state import RAGState
@@ -30,11 +30,14 @@ class RAGNodes:
             retrieved_docs=docs
         )
 
-    def _build_tools(self) -> List[Tool]:
+    def _build_tools(self) -> list:
         """Build retriever + wikipedia tools"""
+        _retriever = self.retriever
 
-        def retriever_tool_fn(query: str) -> str:
-            docs: List[Document] = self.retriever.invoke(query)
+        @tool
+        def retriever(query: str) -> str:
+            """Fetch passages from indexed corpus."""
+            docs: List[Document] = _retriever.invoke(query)
             if not docs:
                 return "No documents found."
             merged = []
@@ -44,22 +47,19 @@ class RAGNodes:
                 merged.append(f"[{i}] {title}\n{d.page_content}")
             return "\n\n".join(merged)
 
-        retriever_tool = Tool(
-            name="retriever",
-            description="Fetch passages from indexed corpus.",
-            func=retriever_tool_fn,
-        )
-
-        wiki = WikipediaQueryRun(
+        _wiki = WikipediaQueryRun(
             api_wrapper=WikipediaAPIWrapper(top_k_results=3, lang="en")  # type: ignore[call-arg]
         )
-        wikipedia_tool = Tool(
-            name="wikipedia",
-            description="Search Wikipedia for general knowledge.",
-            func=wiki.run,
-        )
 
-        return [retriever_tool, wikipedia_tool]
+        @tool
+        def wikipedia(query: str) -> str:
+            """Search Wikipedia for general knowledge."""
+            try:
+                return _wiki.run(query)
+            except Exception as e:
+                return f"Wikipedia search failed: {e}"
+
+        return [retriever, wikipedia]
 
     def _build_agent(self):
         """ReAct agent with tools"""
