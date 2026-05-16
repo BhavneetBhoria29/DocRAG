@@ -1,12 +1,13 @@
 """LangGraph nodes for RAG workflow + ReAct Agent inside generate_content"""
 
 from typing import List, Optional
-from src.state.rag_state import RAGState
 
+from langchain.agents import create_agent
 from langchain_core.documents import Document
 from langchain_core.tools import Tool
 from langchain_core.messages import HumanMessage
-from langgraph.prebuilt import create_react_agent
+from langgraph.graph.state import CompiledStateGraph
+from src.state.rag_state import RAGState
 
 # Wikipedia tool
 from langchain_community.utilities import WikipediaAPIWrapper
@@ -19,7 +20,7 @@ class RAGNodes:
     def __init__(self, retriever, llm):
         self.retriever = retriever
         self.llm = llm
-        self._agent = None  # lazy-init agent
+        self._agent: Optional[CompiledStateGraph] = None
 
     def retrieve_docs(self, state: RAGState) -> RAGState:
         """Classic retriever node"""
@@ -50,7 +51,7 @@ class RAGNodes:
         )
 
         wiki = WikipediaQueryRun(
-            api_wrapper=WikipediaAPIWrapper(top_k_results=3, lang="en")
+            api_wrapper=WikipediaAPIWrapper(top_k_results=3, lang="en")  # type: ignore[call-arg]
         )
         wikipedia_tool = Tool(
             name="wikipedia",
@@ -68,7 +69,7 @@ class RAGNodes:
             "Prefer 'retriever' for user-provided docs; use 'wikipedia' for general knowledge. "
             "Return only the final useful answer."
         )
-        self._agent = create_react_agent(self.llm, tools=tools,prompt=system_prompt)
+        self._agent = create_agent(self.llm, tools=tools, system_prompt=system_prompt)
 
     def generate_answer(self, state: RAGState) -> RAGState:
         """
@@ -76,6 +77,7 @@ class RAGNodes:
         """
         if self._agent is None:
             self._build_agent()
+        assert self._agent is not None
 
         result = self._agent.invoke({"messages": [HumanMessage(content=state.question)]})
 

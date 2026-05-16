@@ -1,6 +1,9 @@
 """Graph builder for LangGraph workflow"""
 
+from typing import Optional
+
 from langgraph.graph import StateGraph, END
+from langgraph.graph.state import CompiledStateGraph
 from src.state.rag_state import RAGState
 from src.node.reactnode import RAGNodes
 
@@ -16,7 +19,7 @@ class GraphBuilder:
             llm: Language model instance
         """
         self.nodes = RAGNodes(retriever, llm)
-        self.graph = None
+        self.graph: Optional[CompiledStateGraph] = None
     
     def build(self):
         """
@@ -55,6 +58,7 @@ class GraphBuilder:
         """
         if self.graph is None:
             self.build()
-        
+        assert self.graph is not None
+
         initial_state = RAGState(question=question)
         return self.graph.invoke(initial_state)
