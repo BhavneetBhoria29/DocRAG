@@ -1,15 +1,11 @@
-"""LangGraph nodes for RAG workflow + ReAct Agent inside generate_content"""
-
+"""LangGraph nodes for RAG workflow + ReAct Agent inside generate_answer"""
 from typing import List, Optional
-
-from langchain.agents import create_agent
 from langchain_core.documents import Document
 from langchain_core.tools import tool
 from langchain_core.messages import HumanMessage
 from langgraph.graph.state import CompiledStateGraph
+from langgraph.prebuilt import create_react_agent
 from src.state.rag_state import RAGState
-
-# Wikipedia tool
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_community.tools.wikipedia.tool import WikipediaQueryRun
 
@@ -48,7 +44,7 @@ class RAGNodes:
             return "\n\n".join(merged)
 
         _wiki = WikipediaQueryRun(
-            api_wrapper=WikipediaAPIWrapper(top_k_results=3, lang="en")  # type: ignore[call-arg]
+            api_wrapper=WikipediaAPIWrapper(top_k_results=3, lang="en")
         )
 
         @tool
@@ -69,20 +65,21 @@ class RAGNodes:
             "Prefer 'retriever' for user-provided docs; use 'wikipedia' for general knowledge. "
             "Return only the final useful answer."
         )
-        self._agent = create_agent(self.llm, tools=tools, system_prompt=system_prompt)
+        self._agent = create_react_agent(
+            self.llm,
+            tools=tools,
+            prompt=system_prompt,
+        )
 
     def generate_answer(self, state: RAGState) -> RAGState:
-        """
-        Generate answer using ReAct agent with retriever + wikipedia.
-        """
+        """Generate answer using ReAct agent with retriever + wikipedia."""
         if self._agent is None:
             self._build_agent()
+
         assert self._agent is not None
-
         result = self._agent.invoke({"messages": [HumanMessage(content=state.question)]})
-
         messages = result.get("messages", [])
-        answer: Optional[str] = None
+        answer = None
         if messages:
             answer_msg = messages[-1]
             answer = getattr(answer_msg, "content", None)

@@ -12,3 +12,4 @@ wheels/
 # Local environment and OS files
 .env
 .DS_Store
+eval/results/*.jsondata/chroma_db/
