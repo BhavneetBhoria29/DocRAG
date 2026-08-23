@@ -197,19 +197,19 @@ DocRAG/
 - [x] Support additional file types (DOCX, CSV, HTML)
 
 ---
-
 ## Evaluation
 
-Evaluated with RAGAS on 20 test cases (GPT-4o judge, temperature 0), embeddings `text-embedding-3-small`:
+Eval-first: the RAGAS harness runs the live pipeline (real retrieval and generation, not hand-written contexts) and reports a 95% bootstrap confidence interval per metric. Judge GPT-4o (temperature 0), embeddings text-embedding-3-small, 17-case golden set.
 
-| Metric            | Score |
-| ----------------- | ----- |
-| Faithfulness      | 0.80  |
-| Answer Relevancy  | 0.82  |
-| Context Precision | 0.80  |
-| Context Recall    | 1.00  |
-| **Average**       | **0.85** |
+Current pipeline (hybrid retrieval + cross-encoder reranking):
 
-Reproducible via `python eval/evaluate.py` and regression-tracked across embedding-model changes. 20 cases is directional, not conclusive; expanding the golden set with confidence intervals is the next milestone.
+| Metric            | Mean | 95% CI       |
+| ----------------- | ---- | ------------ |
+| Context Precision | 0.78 | [0.63, 0.90] |
+| Context Recall    | 0.85 | [0.68, 1.00] |
+| Faithfulness      | 0.67 | [0.55, 0.78] |
+| Answer Relevancy  | 0.91 | [0.86, 0.95] |
 
-**Embedding choice:** `text-embedding-3-small`, selected over ada-002 (deprecated, weaker on MTEB) and over `text-embedding-3-large` (no gain on this set at higher cost). Swapping embeddings forces a full re-embed to keep the vector space consistent, verified by re-running the harness.
+**The reranker is the key retrieval improvement.** Adding it (retrieve 10, cross-encoder rerank to top 6) moved context precision from 0.49 to 0.78 by filtering low-relevance chunks, at a measured cost to recall (0.94 to 0.85) and faithfulness (0.86 to 0.67). This is a deliberate precision/recall tradeoff, tuned via top_n. Faithfulness recovery (chunk-size and grounding-prompt tuning) is the next milestone.
+
+Reproducible via `python eval/evaluate.py`; per-run JSON and per-sample scores are saved under `eval/results/`. Retrieval quality is regression-tested, not asserted. 17 cases is directional; growing the golden set tightens the intervals.
