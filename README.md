@@ -1,5 +1,5 @@
 # DocRAG — Agentic RAG with LangGraph
-
+[![Live demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://docrag-wyswffymwpet3f4hxqm7ex.streamlit.app)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-agentic-purple.svg)](https://github.com/langchain-ai/langgraph)
 [![ChromaDB](https://img.shields.io/badge/vector--store-ChromaDB-green.svg)](https://github.com/chroma-core/chroma)
