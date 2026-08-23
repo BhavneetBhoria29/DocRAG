@@ -173,7 +173,7 @@ DocRAG/
 |---|---|
 | [LangChain](https://github.com/langchain-ai/langchain) | Document loading, embeddings, tool abstractions |
 | [LangGraph](https://github.com/langchain-ai/langgraph) | Stateful agent graph / ReAct loop |
-| [OpenAI](https://platform.openai.com/) | GPT-4o (LLM) + text-embedding-ada-002 (embeddings) |
+| [OpenAI](https://platform.openai.com/) | GPT-4o (LLM) + text-embedding-3-small (embeddings) |
 | [ChromaDB](https://github.com/chroma-core/chroma) | Persistent local vector store with OpenAI embeddings |
 | [rank-bm25](https://github.com/dorianbrown/rank_bm25) | BM25 keyword retriever for hybrid search |
 | [Streamlit](https://streamlit.io/) | Web UI |
@@ -200,14 +200,16 @@ DocRAG/
 
 ## Evaluation
 
-Evaluated using [RAGAS](https://github.com/explodinggradients/ragas) on 5 domain-relevant test cases:
+Evaluated with RAGAS on 20 test cases (GPT-4o judge, temperature 0), embeddings `text-embedding-3-small`:
 
-| Metric | Score |
-|---|---|
-| Faithfulness | 0.80 |
-| Answer Relevancy | 0.82 |
-| Context Precision | 0.90 |
-| Context Recall | 1.00 |
-| **Average** | **0.88** |
+| Metric            | Score |
+| ----------------- | ----- |
+| Faithfulness      | 0.80  |
+| Answer Relevancy  | 0.82  |
+| Context Precision | 0.80  |
+| Context Recall    | 1.00  |
+| **Average**       | **0.85** |
 
-Run it yourself: `python eval/evaluate.py`
+Reproducible via `python eval/evaluate.py` and regression-tracked across embedding-model changes. 20 cases is directional, not conclusive; expanding the golden set with confidence intervals is the next milestone.
+
+**Embedding choice:** `text-embedding-3-small`, selected over ada-002 (deprecated, weaker on MTEB) and over `text-embedding-3-large` (no gain on this set at higher cost). Swapping embeddings forces a full re-embed to keep the vector space consistent, verified by re-running the harness.

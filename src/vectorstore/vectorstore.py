@@ -15,7 +15,7 @@ class VectorStore:
 
     def __init__(self):
         """Initialize vector store with OpenAI embeddings"""
-        self.embedding = OpenAIEmbeddings()
+        self.embedding = OpenAIEmbeddings(model="text-embedding-3-small")
         self.vectorstore = None
         self.retriever = None
         self._documents: List[Document] = []
