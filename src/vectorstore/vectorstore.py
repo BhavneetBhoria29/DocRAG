@@ -5,7 +5,11 @@ from langchain_chroma import Chroma
 from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.retrievers import BM25Retriever
-from langchain.retrievers import EnsembleRetriever
+from langchain.retrievers import EnsembleRetriever, ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import CrossEncoderReranker
+from langchain_community.cross_encoders import HuggingFaceCrossEncoder
+
+from src.config.config import Config
 
 CHROMA_PERSIST_DIR = str(Path(__file__).parent.parent.parent / "data" / "chroma_db")
 
@@ -46,22 +50,33 @@ class VectorStore:
                 persist_directory=CHROMA_PERSIST_DIR,
             )
 
-        # Semantic retriever (ChromaDB)
-        semantic_retriever = self.vectorstore.as_retriever(
-            search_kwargs={"k": 4}
-        )
+        k = Config.RETRIEVER_K
 
-        # BM25 keyword retriever
+        # Semantic retriever (ChromaDB) — retrieve wide
+        semantic_retriever = self.vectorstore.as_retriever(search_kwargs={"k": k})
+
+        # BM25 keyword retriever — retrieve wide
         bm25_retriever = BM25Retriever.from_documents(documents)
-        bm25_retriever.k = 4
+        bm25_retriever.k = k
 
-        # Hybrid: 50% BM25 + 50% semantic
-        self.retriever = EnsembleRetriever(
+        # Hybrid: 50% BM25 + 50% semantic, fused over the wide candidate set
+        base_retriever = EnsembleRetriever(
             retrievers=[bm25_retriever, semantic_retriever],
             weights=[0.5, 0.5],
         )
 
-        print("🔀 Hybrid retriever ready (BM25 + semantic)")
+        if Config.USE_RERANKER:
+            print(f"🎯 Reranker: {Config.RERANKER_MODEL}")
+            cross_encoder = HuggingFaceCrossEncoder(model_name=Config.RERANKER_MODEL)
+            compressor = CrossEncoderReranker(model=cross_encoder, top_n=Config.RERANK_TOP_N)
+            self.retriever = ContextualCompressionRetriever(
+                base_compressor=compressor,
+                base_retriever=base_retriever,
+            )
+            print(f"🔀 Hybrid + rerank ready (retrieve {k} → rerank to {Config.RERANK_TOP_N})")
+        else:
+            self.retriever = base_retriever
+            print(f"🔀 Hybrid retriever ready (BM25 + semantic, k={k}, no rerank)")
 
     def get_retriever(self):
         """

@@ -14,3 +14,5 @@ wheels/
 .DS_Store
 eval/results/*.jsondata/chroma_db/
 data/chroma_db/
+eval/results/ragas_*.json
+eval/results/per_sample_*.csv

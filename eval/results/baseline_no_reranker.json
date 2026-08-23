@@ -1,0 +1,36 @@
+{
+  "timestamp": "20260823_232205",
+  "judge_model": "gpt-4o",
+  "embedding_model": "text-embedding-3-small",
+  "num_samples": 17,
+  "metrics": {
+    "faithfulness": {
+      "n": 17,
+      "mean": 0.8576,
+      "ci_low": 0.7542,
+      "ci_high": 0.9477,
+      "std": 0.2085
+    },
+    "answer_relevancy": {
+      "n": 17,
+      "mean": 0.9422,
+      "ci_low": 0.8989,
+      "ci_high": 0.9748,
+      "std": 0.0806
+    },
+    "context_precision": {
+      "n": 17,
+      "mean": 0.4891,
+      "ci_low": 0.348,
+      "ci_high": 0.6246,
+      "std": 0.2977
+    },
+    "context_recall": {
+      "n": 17,
+      "mean": 0.9412,
+      "ci_low": 0.8235,
+      "ci_high": 1.0,
+      "std": 0.2425
+    }
+  }
+}

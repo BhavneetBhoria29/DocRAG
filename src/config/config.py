@@ -19,6 +19,11 @@ class Config:
     # Document Processing
     CHUNK_SIZE = 500
     CHUNK_OVERLAP = 50
+        # Retrieval / reranking
+    RETRIEVER_K = 10          # retrieve wide before reranking
+    RERANK_TOP_N = 6          # keep this many after reranking
+    RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    USE_RERANKER = os.getenv("USE_RERANKER", "true").lower() == "true"
     
     # Default URLs
     DEFAULT_URLS = [

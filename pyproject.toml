@@ -23,4 +23,5 @@ dependencies = [
     "langchain-chroma>=0.2.6",
     "rank-bm25>=0.2.2",
     "unstructured>=0.27.1",
+    "sentence-transformers>=6.0.0",
 ]
