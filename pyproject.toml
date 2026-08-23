@@ -20,4 +20,5 @@ dependencies = [
     "wikipedia>=1.4.0",
     "ragas>=0.2.0",
     "datasets>=2.14.0",
+    "langchain-chroma>=0.2.6",
 ]
