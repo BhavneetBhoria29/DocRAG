@@ -25,7 +25,7 @@ This means fewer hallucinations on hybrid queries ("summarise this paper and exp
 
 - **Multi-source ingestion** — URLs, PDFs, plain text, DOCX, CSV, and HTML files
 - **ReAct agent (GPT-4o)** — tool routing between hybrid retriever and Wikipedia
-- **Hybrid search** — BM25 + semantic search via ChromaDB with OpenAI embeddings
+- **Hybrid search** — BM25 + semantic search via ChromaDB with text-embedding-3-small embeddings
 - **LangGraph workflow** — stateful retrieve → reason → answer graph with Pydantic state
 - **Streamlit UI** — chat interface with source document preview and search history
 - **CLI mode** — example questions or interactive session from the terminal
@@ -174,7 +174,7 @@ DocRAG/
 | [LangChain](https://github.com/langchain-ai/langchain) | Document loading, embeddings, tool abstractions |
 | [LangGraph](https://github.com/langchain-ai/langgraph) | Stateful agent graph / ReAct loop |
 | [OpenAI](https://platform.openai.com/) | GPT-4o (LLM) + text-embedding-3-small (embeddings) |
-| [ChromaDB](https://github.com/chroma-core/chroma) | Persistent local vector store with OpenAI embeddings |
+| [ChromaDB](https://github.com/chroma-core/chroma) | Persistent local vector store (text-embedding-3-small) |
 | [rank-bm25](https://github.com/dorianbrown/rank_bm25) | BM25 keyword retriever for hybrid search |
 | [Streamlit](https://streamlit.io/) | Web UI |
 | [Wikipedia](https://pypi.org/project/wikipedia/) | General knowledge fallback tool |
