@@ -1,0 +1,11 @@
+# Red-team harness dependencies.
+# These are on top of what DocRAG already installs (langchain, chromadb,
+# the reranker, etc.). The harness reuses your existing OpenAI client.
+
+openai>=1.30
+
+# Optional: only needed if you route the scoring/attack layer through PyRIT
+# instead of the built-in canary + LLM judge. If you enable this, update
+# scorer.py to use PyRIT's SubStringScorer / SelfAskTrueFalseScorer and say so
+# accurately wherever you describe the project.
+# pyrit>=0.5
