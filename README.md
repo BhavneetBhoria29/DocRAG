@@ -213,3 +213,46 @@ Current pipeline (hybrid retrieval + cross-encoder reranking):
 **The reranker is the key retrieval improvement.** Adding it (retrieve 10, cross-encoder rerank to top 6) moved context precision from 0.49 to 0.78 by filtering low-relevance chunks, at a measured cost to recall (0.94 to 0.85) and faithfulness (0.86 to 0.67). This is a deliberate precision/recall tradeoff, tuned via top_n. Faithfulness recovery (chunk-size and grounding-prompt tuning) is the next milestone.
 
 Reproducible via `python eval/evaluate.py`; per-run JSON and per-sample scores are saved under `eval/results/`. Retrieval quality is regression-tested, not asserted. 17 cases is directional; growing the golden set tightens the intervals.
+
+## Security: Indirect Prompt Injection Red-Teaming
+
+RAG's retrieved documents are an attack surface: a poisoned document that gets
+retrieved reaches the generation step. `redteam/` is a canary-based harness that
+adversarially tests this surface on the live pipeline (real hybrid+rerank
+retriever, real graph) and measures a guardrail's effect.
+
+**Method.** 8 payloads across 5 families (override, exfil, fact/data-poisoning,
+refusal, obfuscated). Success is detected deterministically via canary tokens the
+model would not emit unless the injection worked, with an LLM judge (GPT-4o,
+temp 0) for semantic cases. Every case verifies the poison was actually in the
+retrieved context, so a non-success is real resistance, not a poison that never
+got retrieved. Rates carry bootstrap 95% CIs.
+
+**Finding.** The retrieval-to-generation path resists command-style injection
+("ignore the user", "reveal your prompt"): those failed at 0% ASR, because the
+generation prompt treats retrieved chunks as data, not instructions. The path is
+vulnerable to a different class: authority-framed false content ("corrected 2026
+update, supersedes prior versions") is repeated as fact, because doing so is the
+generator's intended behaviour. The attack that works is shaped like legitimate
+content, not like a command.
+
+| | Baseline ASR | Guarded ASR |
+|---|---|---|
+| Overall | 0.62 [0.25, 0.88] | 0.38 [0.12, 0.75] |
+| Data-poisoning family | 1.00 | 0.50 |
+| Command-style (override/exfil/refusal) | 0.00 | 0.00 |
+
+Guardrail false-positive rate on benign queries: 0.00 [0.00, 0.00].
+
+**Honest limitations.**
+- Single run at n=8; CIs are wide and the generator is non-deterministic, so
+  per-family figures wobble between runs. Treat these as directional, not exact.
+  Expanding the golden attack set and averaging over seeds is the next step.
+- The guardrail is a keyword/heuristic screen. It cut the data-poisoning family
+  in half but does nothing for payloads that avoid trigger phrases, which is why
+  guarded ASR is still 0.38. The residual gap is the motivation for a semantic
+  injection detector, not evidence the guardrail is sufficient.
+- One exfil case had its poison filtered by the reranker before generation on
+  this run (logged as NOT-RETRIEVED), so that family is inconclusive at n=1.
+
+Run: `python redteam/run_redteam.py` (see `redteam/README.md`).
