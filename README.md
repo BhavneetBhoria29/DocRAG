@@ -256,3 +256,7 @@ Guardrail false-positive rate on benign queries: 0.00 [0.00, 0.00].
   this run (logged as NOT-RETRIEVED), so that family is inconclusive at n=1.
 
 Run: `python redteam/run_redteam.py` (see `redteam/README.md`).
+
+## Compliance: EU AI Act
+
+[`docs/EU_AI_ACT.md`](docs/EU_AI_ACT.md) classifies DocRAG under the AI Act (as amended by the Digital Omnibus, July 2026), maps the eval and red-team evidence above onto Articles 9 to 15, and lists the gaps. Short version: as a general document Q&A tool it is not high-risk, but the Article 50 transparency duties (AI disclosure, machine-readable marking of generated text) apply now and are not met yet. The same pipeline used for credit decisions would be Annex III high-risk from December 2027, and the write-up lists what that would take.
